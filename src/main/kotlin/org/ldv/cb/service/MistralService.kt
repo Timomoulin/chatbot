@@ -3,33 +3,25 @@ package org.ldv.cb.service
 import org.ldv.cb.dto.MistralChatRequest
 import org.ldv.cb.dto.MistralChatResponse
 import org.ldv.cb.dto.MistralMessage
+import org.ldv.cb.model.entity.ModeleIA
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestClient
 
-
 @Service
 class MistralService(
-
     private val restClientBuilder: RestClient.Builder,
 
-    @Value("\${mistral.api.url}")
-    private val apiUrl: String,
-
     @Value("\${mistral.api.key}")
-    private val apiKey: String,
-
-    @Value("\${mistral.api.model}")
-    private val model: String
+    private val apiKey: String
 ) {
 
-    fun envoyerPrompt(prompt: String): String {
+    fun envoyerPrompt(prompt: String, modele: ModeleIA): String {
 
-        // Création de la requête
         val request = MistralChatRequest(
-            model = model,
+            model = modele.nom,
             messages = listOf(
                 MistralMessage(
                     role = "user",
@@ -38,19 +30,15 @@ class MistralService(
             )
         )
 
-        // Création du client HTTP
-        val restClient = restClientBuilder.build()
-
-        // Envoi de la requête à Mistral
-        val response = restClient.post()
-            .uri(apiUrl)
+        val response = restClientBuilder.build()
+            .post()
+            .uri(modele.urlAPI)
             .header("Authorization", "Bearer $apiKey")
             .contentType(MediaType.APPLICATION_JSON)
             .body(request)
             .retrieve()
             .body(MistralChatResponse::class.java)
 
-        // Récupération de la réponse
         return response
             ?.choices
             ?.firstOrNull()

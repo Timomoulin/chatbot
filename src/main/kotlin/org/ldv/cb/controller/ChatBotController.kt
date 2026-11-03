@@ -2,6 +2,7 @@ package org.ldv.cb.controller
 
 import org.ldv.cb.model.dao.ConversationDAO
 import org.ldv.cb.model.dao.MessageDAO
+import org.ldv.cb.model.dao.ModeleIADAO
 import org.ldv.cb.model.entity.Conversation
 import org.ldv.cb.model.entity.Message
 import org.ldv.cb.model.entity.TypeMessage
@@ -20,17 +21,22 @@ import java.time.LocalDateTime
 class ChatController(
     private val mistralService: MistralService,
     private val conversationDAO: ConversationDAO,
-    private val messageDAO: MessageDAO
+    private val messageDAO: MessageDAO,
+    private val modeleIADAO: ModeleIADAO
 ) {
 
     // Page d'accueil : liste des conversations
     @GetMapping("/")
     fun accueil(model: Model): String {
 
-        val conversations =
+        model.addAttribute(
+            "conversations",
             conversationDAO.findAllByOrderByDateDerniereModificationDesc()
+        )
 
-        model.addAttribute("conversations", conversations)
+        model.addAttribute("modeles", modeleIADAO.findAll())
+        model.addAttribute("conversation", null)
+        model.addAttribute("messages", emptyList<Message>())
 
         return "chat"
     }
@@ -38,19 +44,30 @@ class ChatController(
     // Création d'une nouvelle conversation
     @PostMapping("/conversations")
     fun creerConversation(
-        @RequestParam prompt: String
+        @RequestParam prompt: String,
+        @RequestParam idModele: Long
     ): String {
+
+        // Récupération du modèle sélectionné
+        val modele = modeleIADAO.findById(idModele)
+            .orElseThrow {
+                ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Modèle IA introuvable"
+                )
+            }
 
         // Création de la conversation
         val conversation = Conversation(
             titre = prompt.take(50),
-            dateCreation = LocalDateTime.now()
+            dateCreation = LocalDateTime.now(),
+            modeleIA = modele
         )
 
         val conversationEnregistree =
             conversationDAO.save(conversation)
 
-        // Enregistrement du message utilisateur
+        // Enregistrement du premier message
         val messageUtilisateur = Message(
             contenu = prompt,
             dateCreation = LocalDateTime.now(),
@@ -60,12 +77,10 @@ class ChatController(
 
         messageDAO.save(messageUtilisateur)
 
-        // Envoi du prompt à Mistral
         try {
+            // Utilisation du modèle sélectionné
+            val reponse = mistralService.envoyerPrompt(prompt, modele)
 
-            val reponse = mistralService.envoyerPrompt(prompt)
-
-            // Enregistrement de la réponse
             val messageAssistant = Message(
                 contenu = reponse,
                 dateCreation = LocalDateTime.now(),
@@ -76,11 +91,9 @@ class ChatController(
             messageDAO.save(messageAssistant)
 
         } catch (e: Exception) {
-            // Pour ce premier test, on se contente de journaliser l'erreur.
-            println("Erreur lors de l'appel à Mistral : ${e.message}")
+            println("Erreur Mistral : ${e.message}")
         }
 
-        // Mise à jour de la date de modification
         conversationEnregistree.dateDerniereModification =
             LocalDateTime.now()
 
@@ -117,7 +130,8 @@ class ChatController(
     @PostMapping("/conversations/{id}/messages")
     fun envoyerMessage(
         @PathVariable id: Long,
-        @RequestParam prompt: String
+        @RequestParam prompt: String,
+
     ): String {
 
         val conversation = conversationDAO.findById(id)
@@ -135,7 +149,9 @@ class ChatController(
 
         try {
 
-            val reponse = mistralService.envoyerPrompt(prompt)
+            val modele = conversation.modeleIA!!
+
+            val reponse = mistralService.envoyerPrompt(prompt, modele)
 
             val messageAssistant = Message(
                 contenu = reponse,

@@ -19,8 +19,7 @@ class Message (
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     var id: Long? = null,
-    @Column(length = 1500)
-    //TODO Réfléchir a la taille
+    @Column(columnDefinition = "TEXT", nullable = false)
     var contenu: String,
     var dateCreation: LocalDateTime,
     var typeMessage: TypeMessage,
