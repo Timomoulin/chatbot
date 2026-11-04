@@ -48,9 +48,9 @@ class DataInitializer(
             ),
 
             ModeleIA(
-                nom = "gemini-3.8-pro",
-                urlAPI = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-pro:generateContent",
-                description = "Modèle avancé pour les tâches complexes.",
+                nom = "gemini-3.5-flash-lite",
+                urlAPI = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
+                description = "Modèle rapide pour les tâches simples.",
                 cheminLogo = "/images/gemini.png",
                 fourniseurIA = gemini
             ),
