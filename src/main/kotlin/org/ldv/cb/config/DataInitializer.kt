@@ -1,4 +1,4 @@
-package org.ldv.cb.service
+package org.ldv.cb.config
 
 import org.ldv.cb.model.dao.FourniseurIADAO
 import org.ldv.cb.model.dao.ModeleIADAO
@@ -27,9 +27,33 @@ class DataInitializer(
                     description = "Fournisseur français de modèles d'intelligence artificielle."
                 )
             )
+        val gemini = fourniseurIADAO.findAll()
+            .firstOrNull { it.nom == "Gemini" }
+            ?: fourniseurIADAO.save(
+                FourniseurIA(
+                    nom = "Gemini",
+                    cheminLogo = "/images/gemini.png",
+                    description = "Modèles d'intelligence artificielle de Google."
+                )
+            )
 
         // Modèles à initialiser
         val modeles = listOf(
+            ModeleIA(
+                nom = "gemini-3.8-flash",
+                urlAPI = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+                description = "Modèle rapide et polyvalent.",
+                cheminLogo = "/images/gemini.png",
+                fourniseurIA = gemini
+            ),
+
+            ModeleIA(
+                nom = "gemini-3.8-pro",
+                urlAPI = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-pro:generateContent",
+                description = "Modèle avancé pour les tâches complexes.",
+                cheminLogo = "/images/gemini.png",
+                fourniseurIA = gemini
+            ),
             ModeleIA(
                 nom = "mistral-small-latest",
                 urlAPI = "https://api.mistral.ai/v1/chat/completions",

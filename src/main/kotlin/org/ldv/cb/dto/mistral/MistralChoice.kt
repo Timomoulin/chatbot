@@ -1,4 +1,4 @@
-package org.ldv.cb.dto
+package org.ldv.cb.dto.mistral
 
 
 data class MistralChoice(

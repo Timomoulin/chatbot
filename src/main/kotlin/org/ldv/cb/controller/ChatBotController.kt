@@ -1,5 +1,6 @@
 package org.ldv.cb.controller
 
+import org.ldv.cb.config.IAServiceFactory
 import org.ldv.cb.model.dao.ConversationDAO
 import org.ldv.cb.model.dao.MessageDAO
 import org.ldv.cb.model.dao.ModeleIADAO
@@ -19,7 +20,7 @@ import java.time.LocalDateTime
 
 @Controller
 class ChatController(
-    private val mistralService: MistralService,
+    private val iaServiceFactory: IAServiceFactory,
     private val conversationDAO: ConversationDAO,
     private val messageDAO: MessageDAO,
     private val modeleIADAO: ModeleIADAO
@@ -78,8 +79,13 @@ class ChatController(
         messageDAO.save(messageUtilisateur)
 
         try {
+            // Sélection automatique du service
+            val iaService = iaServiceFactory.getService(modele)
+
+// Appel du fournisseur correspondant
+            val reponse = iaService.envoyerPrompt(prompt, modele)
             // Utilisation du modèle sélectionné
-            val reponse = mistralService.envoyerPrompt(prompt, modele)
+
 
             val messageAssistant = Message(
                 contenu = reponse,
@@ -148,10 +154,14 @@ class ChatController(
         messageDAO.save(messageUtilisateur)
 
         try {
+var modele = conversation.modeleIA!!
+            // Sélection automatique du service
+            val iaService = iaServiceFactory.getService(modele)
 
-            val modele = conversation.modeleIA!!
+// Appel du fournisseur correspondant
+            val reponse = iaService.envoyerPrompt(prompt, modele)
 
-            val reponse = mistralService.envoyerPrompt(prompt, modele)
+
 
             val messageAssistant = Message(
                 contenu = reponse,
@@ -163,7 +173,7 @@ class ChatController(
             messageDAO.save(messageAssistant)
 
         } catch (e: Exception) {
-            println("Erreur lors de l'appel à Mistral : ${e.message}")
+            println("Erreur lors de l'appel à ${conversation.modeleIA!!.nom} : ${e.message}")
         }
 
         conversation.dateDerniereModification = LocalDateTime.now()

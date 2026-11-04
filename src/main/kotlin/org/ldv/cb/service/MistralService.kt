@@ -1,10 +1,9 @@
 package org.ldv.cb.service
 
-import org.ldv.cb.dto.MistralChatRequest
-import org.ldv.cb.dto.MistralChatResponse
-import org.ldv.cb.dto.MistralMessage
+import org.ldv.cb.dto.mistral.MistralChatRequest
+import org.ldv.cb.dto.mistral.MistralChatResponse
+import org.ldv.cb.dto.mistral.MistralMessage
 import org.ldv.cb.model.entity.ModeleIA
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
@@ -16,9 +15,13 @@ class MistralService(
 
     @Value("\${mistral.api.key}")
     private val apiKey: String
-) {
+): IAService {
+    override fun getFournisseur(): String = "Mistral"
 
-    fun envoyerPrompt(prompt: String, modele: ModeleIA): String {
+    override fun envoyerPrompt(
+        prompt: String,
+        modele: ModeleIA
+    ): String {
 
         val request = MistralChatRequest(
             model = modele.nom,
@@ -46,4 +49,5 @@ class MistralService(
             ?.content
             ?: "Aucune réponse reçue de Mistral."
     }
+
 }
