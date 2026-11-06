@@ -1,0 +1,57 @@
+classDiagram
+direction LR
+
+class Utilisateur {
+    -Long id
+    -String nom
+    -String email
+    -String motDePasse
+}
+
+class Role {
+    -Long id
+    -String nom
+}
+
+class Conversation {
+    -Long id
+    -String titre
+    -LocalDateTime dateCreation
+    -LocalDateTime dateDerniereModification
+}
+
+class Message {
+    -Long id
+    -String contenu
+    -LocalDateTime dateCreation
+    -TypeMessage typeMessage
+}
+
+class TypeMessage {
+    <<enumeration>>
+    SYSTEME
+    UTILISATEUR
+    ASSISTANT
+}
+
+class FournisseurIA {
+    -Long id
+    -String nom
+    -String description
+    -String cheminLogo
+}
+
+class ModeleIA {
+    -Long id
+    -String nom
+    -String urlAPI
+    -String description
+    -String cheminLogo
+}
+
+Role "1" --> "0..*" Utilisateur : est attribue
+Utilisateur "1" --> "0..*" Conversation : possede
+Conversation "1" *-- "0..*" Message : contient
+Conversation "0..*" --> "1" ModeleIA : utilise
+FournisseurIA "1" --> "0..*" ModeleIA : propose
+Message --> TypeMessage : est de type

@@ -1,0 +1,34 @@
+usecase-beta
+direction LR
+
+actor Utilisateur
+actor Admin("Administrateur")
+actor API("API IA externe")
+
+systemBoundary Chatbot["Application Chatbot IA"]
+    Connexion("Se connecter")
+    Creation("Créer une conversation")
+    Selection("Choisir un modèle IA")
+    Message("Envoyer un message")
+    Reponse("Obtenir une réponse IA")
+    Historique("Consulter ses conversations")
+    Consultation("Consulter une conversation")
+    GestionModeles("Gérer les modèles IA")
+    GestionFournisseurs("Gérer les fournisseurs IA")
+    GestionUtilisateurs("Gérer les utilisateurs")
+end
+
+
+Utilisateur --> Connexion
+Utilisateur --> Creation
+Utilisateur --> Message
+Utilisateur --> Historique
+Utilisateur --> Consultation
+
+Creation ..> : include Selection
+Message ..> : include Reponse
+Reponse <-- API
+
+GestionModeles <-- Admin
+GestionFournisseurs <-- Admin
+GestionUtilisateurs <-- Admin

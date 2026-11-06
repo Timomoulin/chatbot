@@ -1,0 +1,52 @@
+erDiagram
+    ROLE {
+        BIGINT id PK
+        VARCHAR nom
+    }
+
+    UTILISATEUR {
+        BIGINT id PK
+        VARCHAR nom
+        VARCHAR email UK
+        VARCHAR mot_de_passe
+        BIGINT role_id FK
+    }
+
+    FOURNISSEUR_IA {
+        BIGINT id PK
+        VARCHAR nom
+        TEXT description
+        VARCHAR chemin_logo
+    }
+
+    MODELE_IA {
+        BIGINT id PK
+        VARCHAR nom
+        VARCHAR url_api
+        TEXT description
+        VARCHAR chemin_logo
+        BIGINT fournisseur_ia_id FK
+    }
+
+    CONVERSATION {
+        BIGINT id PK
+        VARCHAR titre
+        DATETIME date_creation
+        DATETIME date_derniere_modification
+        BIGINT utilisateur_id FK
+        BIGINT modele_ia_id FK
+    }
+
+    MESSAGE {
+        BIGINT id PK
+        TEXT contenu
+        DATETIME date_creation
+        VARCHAR type_message
+        BIGINT conversation_id FK
+    }
+
+    ROLE ||--o{ UTILISATEUR : attribue
+    UTILISATEUR ||--o{ CONVERSATION : possede
+    FOURNISSEUR_IA ||--o{ MODELE_IA : propose
+    MODELE_IA ||--o{ CONVERSATION : utilise
+    CONVERSATION ||--o{ MESSAGE : contient
